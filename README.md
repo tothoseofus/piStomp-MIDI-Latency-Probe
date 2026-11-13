@@ -1,6 +1,16 @@
-# piStomp MIDI Latency Probe — prototype v0.1.0
+# piStomp MIDI Latency Probe — v0.0.1
 
 Lightweight LV2 plugin for GuitarMidi-LV2 benchmarking on piStomp v3 (Pi 5).
+
+## ⚠️ DANGER — NEVER CONNECT THE ENCODED MIDI PCM OUTPUT TO SPEAKERS OR AN AMPLIFIER
+
+**DO NOT LISTEN TO, MONITOR, PLAY BACK THROUGH SPEAKERS/HEADPHONES, OR CONNECT THE `Encoded MIDI Right` OUTPUT TO A SPEAKER, AMPLIFIER, PA SYSTEM OR OTHER AUDIO PLAYBACK DEVICE.**
+
+**The right output is NOT MUSIC OR AN AUDIO SIGNAL FOR LISTENING. It carries diagnostic PCM DATA with abrupt full-scale marker samples. It can produce loud clicks and potentially damage connected equipment or hearing.**
+
+**Route `Encoded MIDI Right` ONLY to a recording/capture input configured for direct, unprocessed capture. Mute its monitoring/playback. When analysing recordings, do not audition the raw or reconstructed MIDI pulse channel.** The `Dry Audio Left` output carries normal guitar audio, but any stereo recording containing the right-channel data must also be treated as diagnostic data, **not played through speakers**.
+
+---
 
 ## Purpose
 
@@ -42,10 +52,10 @@ Guitar Input --+---> GuitarMidi: Audio In
                            GuitarMidi: MIDI Out ---> Probe: MIDI In
 
 Probe: Dry Audio Left ------> Output 1 (left)
-Probe: Encoded MIDI Right --> Output 2 (right)
+Probe: Encoded MIDI Right --> RECORDER ONLY (right, monitoring MUTED)
 ```
 
-Record the two outputs as stereo **with no effects, gain adjustments, pan mixing or resampling on the right channel**. Use piStomp's existing recorder or an external stereo capture. **Do not listen to the right channel**: it contains encoded diagnostic PCM, not music. If recording to integer PCM, use 16-bit or better, preferably 32-bit float WAV. Do not use MP3 or other lossy compression.
+Record the two outputs as stereo **with no effects, gain adjustments, pan mixing or resampling on the right channel**. Use piStomp's existing recorder or an external stereo capture. **WARNING: Never route the right channel into a loudspeaker, amplifier, monitor bus, or headphones. Disable monitoring on the recorder.** It contains encoded diagnostic PCM, not music. If recording to integer PCM, use 16-bit or better, preferably 32-bit float WAV. Do not use MP3 or other lossy compression.
 
 ## Decode on Windows or other computer
 
@@ -54,7 +64,7 @@ py -m pip install numpy soundfile
 py tools/decode.py measurement.wav
 ```
 
-Writes `measurement_midi_events.csv` with precise incoming MIDI event timestamps and `measurement_reconstructed.wav` with the dry guitar left, MIDI impulses right (positive = Note On; negative = Note Off). Where multiple events share the same exact sample, CSV contains them all and the reconstructed WAV combines their visual markers.
+Writes `measurement_midi_events.csv` with precise incoming MIDI event timestamps and `measurement_reconstructed.wav` with the dry guitar left, MIDI impulses right (positive = Note On; negative = Note Off). **The reconstructed WAV is also diagnostic data: do not play the right channel through speakers or headphones.** Where multiple events share the same exact sample, CSV contains them all and the reconstructed WAV combines their visual markers.
 
 ## Format and timing
 

@@ -9,7 +9,7 @@
     a lv2:Plugin, lv2:UtilityPlugin ;
     doap:name "piStomp MIDI Latency Probe" ;
     doap:license <https://www.gnu.org/licenses/gpl-3.0.html> ;
-    rdfs:comment "Copy dry audio to left and encode timestamped MIDI events as PCM packets on right. For measurement, not listening." ;
+    rdfs:comment "SAFETY WARNING: DO NOT CONNECT THE ENCODED MIDI RIGHT OUTPUT TO SPEAKERS, AMPLIFIERS, HEADPHONES OR AUDIO MONITORING. Diagnostic PCM pulses only; capture to a recorder with monitoring muted. Left output is dry guitar audio." ;
     lv2:requiredFeature urid:map ;
     lv2:optionalFeature lv2:hardRTCapable ;
     lv2:port

@@ -1,48 +1,26 @@
-
 <div class="mod-latency-probe{{{cns}}}">
-
   <div class="probe-shell" mod-role="drag-handle">
     <div class="probe-stripe"></div>
     <div class="probe-eyebrow">piStomp · DIAGNOSTICS</div>
     <div class="probe-title">MIDI LATENCY</div>
     <div class="probe-title probe-title-sub">PROBE</div>
     <div class="probe-rule"></div>
-    <div class="probe-subtitle">AUDIO + MIDI TIMING</div>
-    <div class="probe-foot">
-      L / DRY AUDIO &nbsp;·&nbsp; R / MIDI PCM
+    <div class="probe-warning" role="note" aria-label="Safety warning">
+      <div class="probe-warning-title">⚠ DO NOT CONNECT TO SPEAKERS / AMP</div>
+      <div class="probe-warning-detail">RIGHT OUTPUT: DATA ONLY · RECORD WITH MONITORING MUTED</div>
     </div>
+    <div class="probe-foot">L / DRY AUDIO &nbsp;·&nbsp; R / MIDI PCM DATA</div>
   </div>
-
-  <!-- Left: audio input -->
   <div class="mod-pedal-input probe-audio-in">
-    <div class="mod-input"
-         title="Dry Guitar In"
-         mod-role="input-audio-port"
-         mod-port-symbol="audio_in"></div>
+    <div class="mod-input" title="Dry Guitar In" mod-role="input-audio-port" mod-port-symbol="audio_in"></div>
   </div>
-
-  <!-- Left: MIDI input -->
   <div class="mod-pedal-input probe-midi-in">
-    <div class="mod-input"
-         title="MIDI In"
-         mod-role="input-midi-port"
-         mod-port-symbol="midi_in"></div>
+    <div class="mod-input" title="MIDI In" mod-role="input-midi-port" mod-port-symbol="midi_in"></div>
   </div>
-
-  <!-- Right: dry audio output -->
   <div class="mod-pedal-output probe-audio-left">
-    <div class="mod-output"
-         title="Dry Audio Left"
-         mod-role="output-audio-port"
-         mod-port-symbol="audio_left"></div>
+    <div class="mod-output" title="Dry Audio Left" mod-role="output-audio-port" mod-port-symbol="audio_left"></div>
   </div>
-
-  <!-- Right: encoded MIDI PCM audio output -->
   <div class="mod-pedal-output probe-midi-pcm-right">
-    <div class="mod-output"
-         title="Encoded MIDI Right"
-         mod-role="output-audio-port"
-         mod-port-symbol="midi_pcm_right"></div>
+    <div class="mod-output" title="DANGER: Encoded MIDI PCM DATA — RECORDER ONLY; NO SPEAKERS/AMPLIFIERS" mod-role="output-audio-port" mod-port-symbol="midi_pcm_right"></div>
   </div>
-
 </div>
