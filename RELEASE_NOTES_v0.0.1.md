@@ -30,3 +30,11 @@ Connect the source guitar audio to both GuitarMidi-LV2 and the probe's **Dry Gui
 
 **Release tag:** `v0.0.1`  
 **Release name:** `Latency Monitor`
+
+## Ownership and plugin URI
+
+Copyright © 2026 Ken Spanks. GPL-3.0-only.
+
+Plugin URI and homepage: https://github.com/tothoseofus/piStomp-MIDI-Latency-Probe
+
+**Breaking LV2 identity change:** Pre-release `example.org` pedalboard entries need to be replaced with the new plugin URI.

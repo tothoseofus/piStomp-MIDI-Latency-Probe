@@ -6,6 +6,9 @@ LDFLAGS = -shared
 BINARY = latency_probe.so
 BUILD_DIR = build
 BUNDLE = $(BUILD_DIR)/pistomp-midi-latency-probe.lv2
+VERSION := $(strip $(shell cat VERSION))
+VERSION_MINOR := $(word 2,$(subst ., ,$(VERSION)))
+VERSION_MICRO := $(word 3,$(subst ., ,$(VERSION)))
 MODGUI_FILES = $(wildcard lv2/modgui/*)
 
 .PHONY: all clean package
@@ -20,8 +23,8 @@ $(BUNDLE)/$(BINARY): src/latency_probe.c | $(BUNDLE)
 $(BUNDLE)/manifest.ttl: lv2/manifest.ttl | $(BUNDLE)
 	sed 's/latency_probe\.so/$(BINARY)/' $< > $@
 
-$(BUNDLE)/latency_probe.ttl: lv2/latency_probe.ttl | $(BUNDLE)
-	cp $< $@
+$(BUNDLE)/latency_probe.ttl: lv2/latency_probe.ttl VERSION | $(BUNDLE)
+	sed -e "s/@LV2_MINOR@/$(VERSION_MINOR)/g" -e "s/@LV2_MICRO@/$(VERSION_MICRO)/g" -e "s/@VERSION@/$(VERSION)/g" $< > $@
 
 $(BUNDLE)/modgui.ttl: lv2/modgui.ttl | $(BUNDLE)
 	cp $< $@

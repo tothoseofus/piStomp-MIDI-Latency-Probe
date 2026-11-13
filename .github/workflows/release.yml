@@ -1,0 +1,78 @@
+name: Publish Release
+
+on:
+  workflow_dispatch:
+  push:
+    tags:
+      - 'v*'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-latency-probe
+  cancel-in-progress: false
+
+jobs:
+  validate:
+    runs-on: ubuntu-24.04
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate VERSION and release target
+        id: version
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch && "$GITHUB_REF" != refs/heads/main ]]; then
+            echo 'Run manual releases from main only'; exit 1
+          fi
+          python3 tools/version.py
+          tag="v$(cat VERSION)"
+          if [[ "$GITHUB_REF_TYPE" == tag && "$GITHUB_REF_NAME" != "$tag" ]]; then
+            echo 'Tag does not match VERSION'; exit 1
+          fi
+          if gh release view "$tag" --repo "$GITHUB_REPOSITORY" >/dev/null 2>&1; then
+            echo "Release already exists: $tag"; exit 1
+          fi
+          if [[ "$GITHUB_EVENT_NAME" == workflow_dispatch ]] && \
+             gh api "repos/${GITHUB_REPOSITORY}/git/ref/tags/${tag}" >/dev/null 2>&1; then
+            echo "Tag already exists: $tag"; exit 1
+          fi
+          echo "tag=$tag" >> "$GITHUB_OUTPUT"
+
+  build:
+    needs: validate
+    uses: ./.github/workflows/build.yml
+
+  publish:
+    needs: [validate, build]
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: write
+    env:
+      GH_TOKEN: ${{ github.token }}
+      RELEASE_TAG: ${{ needs.validate.outputs.tag }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download artifacts from reusable build
+        uses: actions/download-artifact@v4
+        with:
+          pattern: v*-pistomp-midi-latency-probe-*-${{ github.run_number }}
+          path: downloaded
+      - name: Validate and package release assets
+        run: |
+          python3 tools/package_release.py --tag "$RELEASE_TAG" --run-number "$GITHUB_RUN_NUMBER"
+      - name: Create tag for manual release
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          gh api --method POST "repos/${GITHUB_REPOSITORY}/git/refs" \
+            -f ref="refs/tags/${RELEASE_TAG}" -f sha="$GITHUB_SHA"
+      - name: Publish GitHub release
+        run: |
+          gh release create "$RELEASE_TAG" release-assets/*.zip \
+            --title "piStomp MIDI Latency Probe $RELEASE_TAG" \
+            --notes-file release-assets/RELEASE_NOTES.md --verify-tag

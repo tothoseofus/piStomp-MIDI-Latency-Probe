@@ -3,11 +3,18 @@
 @prefix midi: <http://lv2plug.in/ns/ext/midi#> .
 @prefix urid: <http://lv2plug.in/ns/ext/urid#> .
 @prefix doap: <http://usefulinc.com/ns/doap#> .
+@prefix foaf: <http://xmlns.com/foaf/0.1/> .
 @prefix rdfs: <http://www.w3.org/2000/01/rdf-schema#> .
 
-<https://example.org/pistomp-midi-latency-probe>
+<https://github.com/tothoseofus/piStomp-MIDI-Latency-Probe>
     a lv2:Plugin, lv2:UtilityPlugin ;
     doap:name "piStomp MIDI Latency Probe" ;
+    doap:homepage <https://github.com/tothoseofus/piStomp-MIDI-Latency-Probe> ;
+    doap:maintainer [ a foaf:Person ; foaf:name "Ken Spanks" ] ;
+    doap:developer [ a foaf:Person ; foaf:name "Ken Spanks" ] ;
+    doap:revision "@VERSION@" ;
+    lv2:minorVersion @LV2_MINOR@ ;
+    lv2:microVersion @LV2_MICRO@ ;
     doap:license <https://www.gnu.org/licenses/gpl-3.0.html> ;
     rdfs:comment "SAFETY WARNING: DO NOT CONNECT THE ENCODED MIDI RIGHT OUTPUT TO SPEAKERS, AMPLIFIERS, HEADPHONES OR AUDIO MONITORING. Diagnostic PCM pulses only; capture to a recorder with monitoring muted. Left output is dry guitar audio." ;
     lv2:requiredFeature urid:map ;

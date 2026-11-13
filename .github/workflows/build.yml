@@ -1,14 +1,19 @@
-
-name: Build LV2 bundles (piStomp, Linux, Windows)
+name: Build LV2 (ARM64, Linux, Windows)
 
 on:
+  workflow_call:
   workflow_dispatch:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
 
 jobs:
   build:
-    name: Build ${{ matrix.target }}
+    name: ${{ matrix.target }}
     runs-on: ubuntu-24.04
-
     strategy:
       fail-fast: false
       matrix:
@@ -17,68 +22,54 @@ jobs:
             compiler: aarch64-linux-gnu-gcc
             binary: latency_probe.so
             packages: gcc-aarch64-linux-gnu
-
           - target: linux-x86_64
             compiler: gcc
             binary: latency_probe.so
             packages: gcc
-
           - target: windows-x86_64
             compiler: x86_64-w64-mingw32-gcc
             binary: latency_probe.dll
             packages: gcc-mingw-w64-x86-64
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y lv2-dev ${{ matrix.packages }} file
-
-      - name: Stage LV2 headers for Windows cross-compilation
+      - name: Validate VERSION / release tag
+        id: version
+        run: |
+          python3 tools/version.py
+          echo "version=$(cat VERSION)" >> "$GITHUB_OUTPUT"
+      - name: Stage headers for Windows cross compiler
         if: matrix.target == 'windows-x86_64'
         run: |
           mkdir -p build/windows-lv2-headers
           cp -a /usr/include/lv2 build/windows-lv2-headers/
           test -f build/windows-lv2-headers/lv2/core/lv2.h
-
-      - name: Build LV2 bundle
-        run: |
-          if [ "${{ matrix.target }}" = "windows-x86_64" ]; then
-            make CC=${{ matrix.compiler }} \
-              CPPFLAGS=-Ibuild/windows-lv2-headers \
-              BINARY=${{ matrix.binary }} \
-              BUILD_DIR=build/${{ matrix.target }} all
-          else
-            make CC=${{ matrix.compiler }} \
-              BINARY=${{ matrix.binary }} \
-              BUILD_DIR=build/${{ matrix.target }} all
-          fi
-
-      - name: Validate bundle contents
+      - name: Compile and stage LV2 bundle
         shell: bash
         run: |
           set -euo pipefail
-          bundle="build/${{ matrix.target }}/pistomp-midi-latency-probe.lv2"
-
+          cppflags=''
+          if [[ '${{ matrix.target }}' == 'windows-x86_64' ]]; then
+            cppflags='-Ibuild/windows-lv2-headers'
+          fi
+          make CC=${{ matrix.compiler }} CPPFLAGS="$cppflags" \
+            BINARY=${{ matrix.binary }} BUILD_DIR=stage/${{ matrix.target }} all
+          bundle='stage/${{ matrix.target }}/pistomp-midi-latency-probe.lv2'
           test -s "$bundle/${{ matrix.binary }}"
-          test -s "$bundle/manifest.ttl"
-          test -s "$bundle/latency_probe.ttl"
-          test -s "$bundle/modgui.ttl"
+          test -s "$bundle/LICENSE"
           test -s "$bundle/modgui/screenshot-latency-probe.png"
           test -s "$bundle/modgui/thumbnail-latency-probe.png"
-          test -s "$bundle/LICENSE"
-
           grep -Fq '<${{ matrix.binary }}>' "$bundle/manifest.ttl"
-          grep -Fq 'www.gnu.org/licenses/gpl-3.0.html' "$bundle/latency_probe.ttl"
-
+          grep -Fq 'https://github.com/tothoseofus/piStomp-MIDI-Latency-Probe' "$bundle/latency_probe.ttl"
+          grep -Fq 'Ken Spanks' "$bundle/latency_probe.ttl"
           file "$bundle/${{ matrix.binary }}"
-
-      - name: Upload LV2 bundle (no nested ZIP)
+      - name: Upload unpacked LV2 bundle (no ZIP inside ZIP)
         uses: actions/upload-artifact@v4
         with:
-          name: pistomp-midi-latency-probe-${{ matrix.target }}
-          path: build/${{ matrix.target }}/
+          name: v${{ steps.version.outputs.version }}-pistomp-midi-latency-probe-${{ matrix.target }}-${{ github.run_number }}
+          path: stage/${{ matrix.target }}/
           include-hidden-files: true
           if-no-files-found: error

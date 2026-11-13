@@ -1,6 +1,6 @@
 @prefix modgui: <http://moddevices.com/ns/modgui#> .
 
-<https://example.org/pistomp-midi-latency-probe>
+<https://github.com/tothoseofus/piStomp-MIDI-Latency-Probe>
     modgui:gui [
         modgui:resourcesDirectory <modgui> ;
         modgui:iconTemplate <modgui/icon-latency-probe.html> ;

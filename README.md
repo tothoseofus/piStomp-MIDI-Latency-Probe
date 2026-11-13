@@ -1,4 +1,4 @@
-# piStomp MIDI Latency Probe — v0.0.1
+# piStomp MIDI Latency Probe
 
 Lightweight LV2 plugin for GuitarMidi-LV2 benchmarking on piStomp v3 (Pi 5).
 
@@ -20,7 +20,7 @@ Lightweight LV2 plugin for GuitarMidi-LV2 benchmarking on piStomp v3 (Pi 5).
 
 ## Build
 
-On GitHub, upload files preserving folder layout and enable Actions. The workflow builds using `aarch64-linux-gnu-gcc` and uploads a platform-specific `.lv2` bundle as a GitHub Actions artifact.
+On GitHub, upload files preserving folder layout and enable Actions. The reusable `build.yml` workflow builds all three platforms and uploads `.lv2` bundles as GitHub Actions artifacts.
 
 If building locally on Linux with LV2 headers and a compiler: `make CC=gcc all`.
 
@@ -30,9 +30,9 @@ The workflow builds three independent binary bundles using the same DSP source, 
 
 | Artifact | Target | Binary |
 |---|---|---|
-| `pistomp-midi-latency-probe-pistomp-aarch64` | piStomp 3 / Raspberry Pi 5 Linux ARM64 | `latency_probe.so` |
-| `pistomp-midi-latency-probe-linux-x86_64` | Linux x86-64 LV2 hosts / MOD Desktop | `latency_probe.so` |
-| `pistomp-midi-latency-probe-windows-x86_64` | Windows x86-64 LV2 hosts / MOD Desktop | `latency_probe.dll` |
+| `vX.Y.Z-pistomp-midi-latency-probe-pistomp-aarch64-RUN` | piStomp 3 / Raspberry Pi 5 Linux ARM64 | `latency_probe.so` |
+| `vX.Y.Z-pistomp-midi-latency-probe-linux-x86_64-RUN` | Linux x86-64 LV2 hosts / MOD Desktop | `latency_probe.so` |
+| `vX.Y.Z-pistomp-midi-latency-probe-windows-x86_64-RUN` | Windows x86-64 LV2 hosts / MOD Desktop | `latency_probe.dll` |
 
 **No ZIP inside ZIP:** GitHub Actions uploads the built `.lv2` files directly. The Actions download itself is a ZIP; extract those contents into a directory named `pistomp-midi-latency-probe.lv2` if the downloaded ZIP does not retain the bundle directory. A proper bundle has `manifest.ttl`, `latency_probe.ttl`, `modgui.ttl`, the platform binary and the `modgui/` assets together.
 
@@ -92,3 +92,25 @@ Byte `b` is encoded as `(b + 1) / 512.0` (positive and recoverable in 16-bit or 
 * The 15-sample serialisation doesn't change the original MIDI timestamps, but the PCM pulse starts can be delayed when MIDI events overlap. Use the decoder's reconstructed WAV or CSV, **not the original right-channel packet locations**, for latency measurements.
 
 License: **GNU GPL version 3 only (GPL-3.0-only)**. See [LICENSE](LICENSE).
+
+## Project information and releases
+
+Author and copyright: **Ken Spanks © 2026**. Licence: **GPL-3.0-only**.
+
+Project homepage and LV2 plugin URI: https://github.com/tothoseofus/piStomp-MIDI-Latency-Probe
+
+The `VERSION` file is the single source of truth for the release number. `make` stamps `lv2:minorVersion` and `lv2:microVersion` into the generated bundle. The `Publish Release` workflow calls the reusable `build.yml` workflow, then packages and publishes the three artifacts under the matching `vX.Y.Z` tag.
+
+**URI migration:** The pre-release plugin used `https://example.org/pistomp-midi-latency-probe`. This release intentionally changes its LV2 identity to the GitHub URI. Existing pedalboards referencing the old URI may require removing the old plugin and adding the new one.
+
+Patchstorage publication is performed by the `Upload to Patchstorage` workflow using the official uploader and two Linux targets; Windows downloads remain on GitHub Releases. Configure the Patchstorage credentials as repository secrets first. The user-facing safety warning must remain prominent.
+
+## Automated releases and Patchstorage publication
+
+- `.github/workflows/build.yml` builds ARM64, Linux x86-64 and Windows x86-64 LV2 bundles. It is reusable (`workflow_call`) and can also be run independently. Artifacts contain a directly installable `.lv2` directory with **no nested ZIP**.
+- `.github/workflows/release.yml` validates `VERSION`, calls `build.yml` **once**, downloads all three build artifacts from the same workflow run, validates and creates three platform release ZIPs, and publishes the GitHub release. It accepts manual dispatch from `main` or matching tags.
+- `.github/workflows/patchstorage.yml` is a separate, manually dispatched **live publication** workflow. It downloads the published GitHub release ZIPs and uploads/updates the ARM64 and Linux x86-64 packages on Patchstorage through its LV2 uploader. Windows remains a GitHub release download.
+
+Set GitHub Actions repository secrets `PATCHSTORAGE_USERNAME` and `PATCHSTORAGE_PASSWORD` before running **Upload to Patchstorage**. The account must own any existing Patchstorage listing for this plugin URI. The uploader refuses downgrades and refuses to mislabel **GPL-3.0-only** as GPL-3.0-or-later; its current licence mapping needs to recognise the correct licence identifier.
+
+**SAFETY: Never connect the `Encoded MIDI Right` output or the diagnostic reconstructed WAV right channel to any speaker, amplifier, headphone or monitoring output.**
