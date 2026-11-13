@@ -1,14 +1,14 @@
-
 name: Build LV2 bundles (piStomp, Linux, Windows)
 
 on:
+  push:
+  pull_request:
   workflow_dispatch:
 
 jobs:
   build:
     name: Build ${{ matrix.target }}
     runs-on: ubuntu-24.04
-
     strategy:
       fail-fast: false
       matrix:
@@ -17,51 +17,38 @@ jobs:
             compiler: aarch64-linux-gnu-gcc
             binary: latency_probe.so
             packages: gcc-aarch64-linux-gnu
-
           - target: linux-x86_64
             compiler: gcc
             binary: latency_probe.so
             packages: gcc
-
           - target: windows-x86_64
             compiler: x86_64-w64-mingw32-gcc
             binary: latency_probe.dll
             packages: gcc-mingw-w64-x86-64
-
     steps:
       - uses: actions/checkout@v4
-
       - name: Install dependencies
         run: |
           sudo apt-get update
           sudo apt-get install -y lv2-dev ${{ matrix.packages }} file
-
       - name: Stage LV2 headers for Windows cross-compilation
         if: matrix.target == 'windows-x86_64'
         run: |
           mkdir -p build/windows-lv2-headers
           cp -a /usr/include/lv2 build/windows-lv2-headers/
           test -f build/windows-lv2-headers/lv2/core/lv2.h
-
       - name: Build LV2 bundle
         run: |
           if [ "${{ matrix.target }}" = "windows-x86_64" ]; then
-            make CC=${{ matrix.compiler }} \
-              CPPFLAGS=-Ibuild/windows-lv2-headers \
-              BINARY=${{ matrix.binary }} \
-              BUILD_DIR=build/${{ matrix.target }} all
+            make CC=${{ matrix.compiler }} CPPFLAGS=-Ibuild/windows-lv2-headers BINARY=${{ matrix.binary }} BUILD_DIR=build/${{ matrix.target }} all
           else
-            make CC=${{ matrix.compiler }} \
-              BINARY=${{ matrix.binary }} \
-              BUILD_DIR=build/${{ matrix.target }} all
+            make CC=${{ matrix.compiler }} BINARY=${{ matrix.binary }} BUILD_DIR=build/${{ matrix.target }} all
           fi
-
       - name: Validate bundle contents
         shell: bash
         run: |
           set -euo pipefail
           bundle="build/${{ matrix.target }}/pistomp-midi-latency-probe.lv2"
-
           test -s "$bundle/${{ matrix.binary }}"
           test -s "$bundle/manifest.ttl"
           test -s "$bundle/latency_probe.ttl"
@@ -69,12 +56,11 @@ jobs:
           test -s "$bundle/modgui/screenshot-latency-probe.png"
           test -s "$bundle/modgui/thumbnail-latency-probe.png"
           test -s "$bundle/LICENSE"
-
           grep -Fq '<${{ matrix.binary }}>' "$bundle/manifest.ttl"
           grep -Fq 'www.gnu.org/licenses/gpl-3.0.html' "$bundle/latency_probe.ttl"
-
           file "$bundle/${{ matrix.binary }}"
-
+          python3 tools/version.py
+          grep -Fq "foaf:name \"Ken Spanks\"" "$bundle/latency_probe.ttl"
       - name: Upload LV2 bundle (no nested ZIP)
         uses: actions/upload-artifact@v4
         with:
