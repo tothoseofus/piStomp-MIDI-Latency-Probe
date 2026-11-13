@@ -1,4 +1,6 @@
+
 <div class="mod-latency-probe{{{cns}}}">
+
   <div class="probe-shell" mod-role="drag-handle">
     <div class="probe-stripe"></div>
     <div class="probe-eyebrow">piStomp · DIAGNOSTICS</div>
@@ -6,6 +8,41 @@
     <div class="probe-title probe-title-sub">PROBE</div>
     <div class="probe-rule"></div>
     <div class="probe-subtitle">AUDIO + MIDI TIMING</div>
-    <div class="probe-foot">L / DRY AUDIO &nbsp;&nbsp;·&nbsp;&nbsp; R / MIDI PCM</div>
+    <div class="probe-foot">
+      L / DRY AUDIO &nbsp;·&nbsp; R / MIDI PCM
+    </div>
   </div>
+
+  <!-- Left: audio input -->
+  <div class="mod-pedal-input probe-audio-in">
+    <div class="mod-input"
+         title="Dry Guitar In"
+         mod-role="input-audio-port"
+         mod-port-symbol="audio_in"></div>
+  </div>
+
+  <!-- Left: MIDI input -->
+  <div class="mod-pedal-input probe-midi-in">
+    <div class="mod-input"
+         title="MIDI In"
+         mod-role="input-midi-port"
+         mod-port-symbol="midi_in"></div>
+  </div>
+
+  <!-- Right: dry audio output -->
+  <div class="mod-pedal-output probe-audio-left">
+    <div class="mod-output"
+         title="Dry Audio Left"
+         mod-role="output-audio-port"
+         mod-port-symbol="audio_left"></div>
+  </div>
+
+  <!-- Right: encoded MIDI PCM audio output -->
+  <div class="mod-pedal-output probe-midi-pcm-right">
+    <div class="mod-output"
+         title="Encoded MIDI Right"
+         mod-role="output-audio-port"
+         mod-port-symbol="midi_pcm_right"></div>
+  </div>
+
 </div>
