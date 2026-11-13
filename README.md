@@ -1,4 +1,4 @@
-# piStomp MIDI Latency Probe — v0.0.1
+# piStomp MIDI Latency Probe
 
 Lightweight LV2 plugin for GuitarMidi-LV2 benchmarking on piStomp v3 (Pi 5).
 
@@ -92,3 +92,15 @@ Byte `b` is encoded as `(b + 1) / 512.0` (positive and recoverable in 16-bit or 
 * The 15-sample serialisation doesn't change the original MIDI timestamps, but the PCM pulse starts can be delayed when MIDI events overlap. Use the decoder's reconstructed WAV or CSV, **not the original right-channel packet locations**, for latency measurements.
 
 License: **GNU GPL version 3 only (GPL-3.0-only)**. See [LICENSE](LICENSE).
+
+## Project information and releases
+
+Author and copyright: **Ken Spanks © 2026**. Licence: **GPL-3.0-only**.
+
+Project homepage and LV2 plugin URI: https://github.com/tothoseofus/piStomp-MIDI-Latency-Probe
+
+The `VERSION` file is the single source of truth for the release number. `make` stamps `lv2:minorVersion` and `lv2:microVersion` into the generated bundle. The `Create Release` GitHub Actions workflow builds all three platforms and publishes release ZIPs under the matching `vX.Y.Z` tag.
+
+**URI migration:** The pre-release plugin used `https://example.org/pistomp-midi-latency-probe`. This release intentionally changes its LV2 identity to the GitHub URI. Existing pedalboards referencing the old URI may require removing the old plugin and adding the new one.
+
+For Patchstorage publication, use the `patchstorage/` description and the ARM64/Linux release ZIPs, and keep the prominent safety warning. Windows is available from GitHub Releases; verify whether the chosen Patchstorage LV2 platform supports that target before listing it.

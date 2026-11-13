@@ -1,5 +1,5 @@
 /* piStomp MIDI Latency Probe - SPDX-License-Identifier: GPL-3.0-only
- * Copyright (C) 2026 piStomp MIDI Latency Probe contributors
+ * Copyright (C) 2026 Ken Spanks
  * Audio input is copied directly to the left output.
  * The right output carries a losslessly decodable, fixed-length PCM packet
  * for each channel MIDI event, including its ORIGINAL audio-frame timestamp.
@@ -15,7 +15,7 @@
 #include <lv2/midi/midi.h>
 #include <lv2/urid/urid.h>
 
-#define PLUGIN_URI "https://example.org/pistomp-midi-latency-probe"
+#define PLUGIN_URI "https://github.com/tothoseofus/piStomp-MIDI-Latency-Probe"
 #define QUEUE_CAPACITY 1024u
 #define PACKET_SAMPLES 15u
 #define PACKET_VERSION 1u
