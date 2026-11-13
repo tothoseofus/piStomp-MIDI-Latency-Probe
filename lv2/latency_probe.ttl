@@ -12,6 +12,7 @@
     doap:homepage <https://github.com/tothoseofus/piStomp-MIDI-Latency-Probe> ;
     doap:maintainer [ a foaf:Person ; foaf:name "Ken Spanks" ] ;
     doap:developer [ a foaf:Person ; foaf:name "Ken Spanks" ] ;
+    doap:revision "@VERSION@" ;
     lv2:minorVersion @LV2_MINOR@ ;
     lv2:microVersion @LV2_MICRO@ ;
     doap:license <https://www.gnu.org/licenses/gpl-3.0.html> ;
