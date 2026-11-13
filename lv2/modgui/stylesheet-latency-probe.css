@@ -91,23 +91,23 @@
 
 /* Left connectors */
 .mod-latency-probe{{{cns}}} .probe-audio-in {
-  left: -12px;
+  left: -90px;
   top: 48px;
 }
 
 .mod-latency-probe{{{cns}}} .probe-midi-in {
-  left: -12px;
+  left: -90px;
   top: 116px;
 }
 
 /* Right connectors */
 .mod-latency-probe{{{cns}}} .probe-audio-left {
-  right: -12px;
+  right: -25px;
   top: 48px;
 }
 
 .mod-latency-probe{{{cns}}} .probe-midi-pcm-right {
-  right: -12px;
+  right: -25px;
   top: 116px;
 }
 
