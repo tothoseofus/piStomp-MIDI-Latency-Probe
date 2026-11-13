@@ -1,0 +1,121 @@
+
+.mod-latency-probe{{{cns}}} {
+  position: relative;
+  display: block;
+  width: 340px;
+  height: 190px;
+  font-family: Arial, Helvetica, sans-serif;
+  color: #e9f3f6;
+  overflow: visible;
+}
+
+.mod-latency-probe{{{cns}}} .probe-shell {
+  position: relative;
+  box-sizing: border-box;
+  width: 340px;
+  height: 190px;
+  padding: 20px 24px;
+  overflow: hidden;
+  border: 2px solid #435f6c;
+  border-radius: 13px;
+  background: linear-gradient(
+    160deg, #223a47 0%, #142630 70%, #101f28 100%
+  );
+  box-shadow:
+    inset 0 1px rgba(255,255,255,.15),
+    0 8px 20px rgba(0,0,0,.25);
+  cursor: move;
+  z-index: 1;
+}
+
+.mod-latency-probe{{{cns}}} .probe-stripe {
+  width: 7px;
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  background: #28d9ba;
+}
+
+.mod-latency-probe{{{cns}}} .probe-eyebrow {
+  font-size: 10px;
+  letter-spacing: 2px;
+  font-weight: 700;
+  color: #73cbbc;
+}
+
+.mod-latency-probe{{{cns}}} .probe-title {
+  font-size: 29px;
+  letter-spacing: 1.1px;
+  font-weight: 800;
+  line-height: 1.08;
+  margin-top: 12px;
+}
+
+.mod-latency-probe{{{cns}}} .probe-title-sub {
+  margin-top: 0;
+}
+
+.mod-latency-probe{{{cns}}} .probe-rule {
+  height: 1px;
+  background: #52727f;
+  margin-top: 11px;
+}
+
+.mod-latency-probe{{{cns}}} .probe-subtitle {
+  margin-top: 10px;
+  font-size: 11px;
+  color: #cee3e9;
+  letter-spacing: 1px;
+}
+
+.mod-latency-probe{{{cns}}} .probe-foot {
+  position: absolute;
+  bottom: 13px;
+  left: 24px;
+  font-size: 9px;
+  color: #91aebb;
+  letter-spacing: .45px;
+}
+
+/* MOD connector containers */
+.mod-latency-probe{{{cns}}} .mod-pedal-input,
+.mod-latency-probe{{{cns}}} .mod-pedal-output {
+  position: absolute;
+  z-index: 40;
+  width: 24px;
+  height: 24px;
+  margin: 0;
+  pointer-events: auto;
+}
+
+/* Left connectors */
+.mod-latency-probe{{{cns}}} .probe-audio-in {
+  left: -90px;
+  top: 48px;
+}
+
+.mod-latency-probe{{{cns}}} .probe-midi-in {
+  left: -90px;
+  top: 116px;
+}
+
+/* Right connectors */
+.mod-latency-probe{{{cns}}} .probe-audio-left {
+  right: -25px;
+  top: 48px;
+}
+
+.mod-latency-probe{{{cns}}} .probe-midi-pcm-right {
+  right: -25px;
+  top: 116px;
+}
+
+/* Keep connector hit targets above the drag handle */
+.mod-latency-probe{{{cns}}} .mod-input,
+.mod-latency-probe{{{cns}}} .mod-output {
+  position: relative;
+  z-index: 41;
+  pointer-events: auto;
+  cursor: crosshair;
+}

@@ -1,4 +1,5 @@
-/* piStomp MIDI Latency Probe - SPDX-License-Identifier: MIT
+/* piStomp MIDI Latency Probe - SPDX-License-Identifier: GPL-3.0-only
+ * Copyright (C) 2026 piStomp MIDI Latency Probe contributors
  * Audio input is copied directly to the left output.
  * The right output carries a losslessly decodable, fixed-length PCM packet
  * for each channel MIDI event, including its ORIGINAL audio-frame timestamp.

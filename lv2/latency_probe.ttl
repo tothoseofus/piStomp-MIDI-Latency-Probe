@@ -8,7 +8,7 @@
 <https://example.org/pistomp-midi-latency-probe>
     a lv2:Plugin, lv2:UtilityPlugin ;
     doap:name "piStomp MIDI Latency Probe" ;
-    doap:license <https://opensource.org/licenses/MIT> ;
+    doap:license <https://www.gnu.org/licenses/gpl-3.0.html> ;
     rdfs:comment "Copy dry audio to left and encode timestamped MIDI events as PCM packets on right. For measurement, not listening." ;
     lv2:requiredFeature urid:map ;
     lv2:optionalFeature lv2:hardRTCapable ;
