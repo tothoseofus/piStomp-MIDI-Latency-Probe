@@ -4,4 +4,4 @@
 <https://example.org/pistomp-midi-latency-probe>
     a lv2:Plugin ;
     lv2:binary <latency_probe.so> ;
-    rdfs:seeAlso <latency_probe.ttl> .
+    rdfs:seeAlso <latency_probe.ttl>, <modgui.ttl> .

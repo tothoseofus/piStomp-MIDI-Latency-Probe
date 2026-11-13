@@ -10,13 +10,29 @@ Lightweight LV2 plugin for GuitarMidi-LV2 benchmarking on piStomp v3 (Pi 5).
 
 ## Build
 
-On GitHub, upload files preserving folder layout and enable Actions. The workflow builds using `aarch64-linux-gnu-gcc` and uploads `pistomp-midi-latency-probe-aarch64.zip`.
+On GitHub, upload files preserving folder layout and enable Actions. The workflow builds using `aarch64-linux-gnu-gcc` and uploads a platform-specific `.lv2` bundle as a GitHub Actions artifact.
 
-If building locally on Linux with LV2 headers and a compiler: `make CC=gcc package` (for native x86-64, rename the zip accordingly).
+If building locally on Linux with LV2 headers and a compiler: `make CC=gcc all`.
+
+## Platforms and GitHub Actions artifacts
+
+The workflow builds three independent binary bundles using the same DSP source, MIDI packet format, MOD GUI, and GPL-3.0-only licence:
+
+| Artifact | Target | Binary |
+|---|---|---|
+| `pistomp-midi-latency-probe-pistomp-aarch64` | piStomp 3 / Raspberry Pi 5 Linux ARM64 | `latency_probe.so` |
+| `pistomp-midi-latency-probe-linux-x86_64` | Linux x86-64 LV2 hosts / MOD Desktop | `latency_probe.so` |
+| `pistomp-midi-latency-probe-windows-x86_64` | Windows x86-64 LV2 hosts / MOD Desktop | `latency_probe.dll` |
+
+**No ZIP inside ZIP:** GitHub Actions uploads the built `.lv2` files directly. The Actions download itself is a ZIP; extract those contents into a directory named `pistomp-midi-latency-probe.lv2` if the downloaded ZIP does not retain the bundle directory. A proper bundle has `manifest.ttl`, `latency_probe.ttl`, `modgui.ttl`, the platform binary and the `modgui/` assets together.
+
+The MOD GUI is cosmetic: no JavaScript or controls, and no DSP/UI interaction. Standard LV2 hosts can ignore the MOD-specific files.
+
+For a manual ZIP, `make package` is still available, but the Actions workflow does **not** use it. Windows is cross-compiled via MinGW-w64 on Ubuntu; runtime compatibility with MOD Desktop Windows still requires an on-device check.
 
 ## Install on piStomp
 
-Unzip artifact. Install the `pistomp-midi-latency-probe.lv2` directory under your piStomp LV2 bundle directory (e.g. `/home/patch/.lv2` or your existing custom-plugin location). Refresh/restart the plugin host as needed.
+Download the appropriate GitHub Actions artifact and unzip it. Install the `pistomp-midi-latency-probe.lv2` directory under your piStomp LV2 bundle directory (e.g. `/home/patch/.lv2` or your existing custom-plugin location). Refresh/restart the plugin host as needed.
 
 ## MODEP wiring
 
@@ -65,4 +81,4 @@ Byte `b` is encoded as `(b + 1) / 512.0` (positive and recoverable in 16-bit or 
 * This captures MIDI **arrival time at the probe**. It doesn't directly measure the TFLite model's execution time; guitar attack detection against the dry waveform remains a separate analysis step.
 * The 15-sample serialisation doesn't change the original MIDI timestamps, but the PCM pulse starts can be delayed when MIDI events overlap. Use the decoder's reconstructed WAV or CSV, **not the original right-channel packet locations**, for latency measurements.
 
-License: MIT.
+License: **GNU GPL version 3 only (GPL-3.0-only)**. See [LICENSE](LICENSE).

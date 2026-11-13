@@ -1,3 +1,4 @@
+# SPDX-License-Identifier: GPL-3.0-only
 #!/usr/bin/env python3
 """Decode stereo PCM packets emitted by piStomp MIDI Latency Probe.
 

@@ -1,25 +1,41 @@
-CC = aarch64-linux-gnu-gcc
+# Reusable LV2 build: override CC, BINARY and BUILD_DIR for target platform.
+CC = gcc
 CFLAGS = -O2 -std=c11 -fPIC -Wall -Wextra -Wpedantic
 LDFLAGS = -shared
-BUNDLE = build/pistomp-midi-latency-probe.lv2
+BINARY = latency_probe.so
+BUILD_DIR = build
+BUNDLE = $(BUILD_DIR)/pistomp-midi-latency-probe.lv2
+MODGUI_FILES = $(wildcard lv2/modgui/*)
 
 .PHONY: all clean package
-all: $(BUNDLE)/latency_probe.so $(BUNDLE)/manifest.ttl $(BUNDLE)/latency_probe.ttl
+all: $(BUNDLE)/$(BINARY) $(BUNDLE)/manifest.ttl $(BUNDLE)/latency_probe.ttl $(BUNDLE)/modgui.ttl $(addprefix $(BUNDLE)/modgui/,$(notdir $(MODGUI_FILES))) $(BUNDLE)/LICENSE
 
 $(BUNDLE):
 	mkdir -p $@
 
-$(BUNDLE)/latency_probe.so: src/latency_probe.c | $(BUNDLE)
+$(BUNDLE)/$(BINARY): src/latency_probe.c | $(BUNDLE)
 	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
 
 $(BUNDLE)/manifest.ttl: lv2/manifest.ttl | $(BUNDLE)
-	cp $< $@
+	sed 's/latency_probe\.so/$(BINARY)/' $< > $@
 
 $(BUNDLE)/latency_probe.ttl: lv2/latency_probe.ttl | $(BUNDLE)
 	cp $< $@
 
+$(BUNDLE)/modgui.ttl: lv2/modgui.ttl | $(BUNDLE)
+	cp $< $@
+
+$(BUNDLE)/modgui/%: lv2/modgui/% | $(BUNDLE)
+	mkdir -p $(BUNDLE)/modgui
+	cp $< $@
+
+$(BUNDLE)/LICENSE: LICENSE | $(BUNDLE)
+	cp $< $@
+
+# Optional for manual local packaging. GitHub Actions uploads the bundle
+# directory directly, avoiding the ZIP-inside-ZIP issue.
 package: all
-	cd build && zip -qr ../pistomp-midi-latency-probe-aarch64.zip pistomp-midi-latency-probe.lv2
+	cd $(BUILD_DIR) && zip -qr ../pistomp-midi-latency-probe.zip pistomp-midi-latency-probe.lv2
 
 clean:
-	rm -rf build pistomp-midi-latency-probe-aarch64.zip
+	rm -rf $(BUILD_DIR) pistomp-midi-latency-probe.zip
