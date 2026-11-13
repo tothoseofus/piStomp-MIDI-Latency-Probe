@@ -1,5 +1,6 @@
 # Reusable LV2 build: override CC, BINARY and BUILD_DIR for target platform.
 CC = gcc
+CPPFLAGS ?=
 CFLAGS = -O2 -std=c11 -fPIC -Wall -Wextra -Wpedantic
 LDFLAGS = -shared
 BINARY = latency_probe.so
@@ -14,7 +15,7 @@ $(BUNDLE):
 	mkdir -p $@
 
 $(BUNDLE)/$(BINARY): src/latency_probe.c | $(BUNDLE)
-	$(CC) $(CFLAGS) $(LDFLAGS) -o $@ $<
+	$(CC) $(CPPFLAGS) $(CFLAGS) $(LDFLAGS) -o $@ $<
 
 $(BUNDLE)/manifest.ttl: lv2/manifest.ttl | $(BUNDLE)
 	sed 's/latency_probe\.so/$(BINARY)/' $< > $@
