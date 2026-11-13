@@ -24,7 +24,7 @@ $(BUNDLE)/manifest.ttl: lv2/manifest.ttl | $(BUNDLE)
 	sed 's/latency_probe\.so/$(BINARY)/' $< > $@
 
 $(BUNDLE)/latency_probe.ttl: lv2/latency_probe.ttl VERSION | $(BUNDLE)
-	sed -e "s/@LV2_MINOR@/$(VERSION_MINOR)/g" -e "s/@LV2_MICRO@/$(VERSION_MICRO)/g" $< > $@
+	sed -e "s/@LV2_MINOR@/$(VERSION_MINOR)/g" -e "s/@LV2_MICRO@/$(VERSION_MICRO)/g" -e "s/@VERSION@/$(VERSION)/g" $< > $@
 
 $(BUNDLE)/modgui.ttl: lv2/modgui.ttl | $(BUNDLE)
 	cp $< $@
