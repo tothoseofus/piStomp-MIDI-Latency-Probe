@@ -83,27 +83,32 @@ def main() -> None:
     overrides[PLUGIN_DIR] = {"source_code_url": SOURCE_URL, "donate_url": None}
     overrides_path.write_text(json.dumps(overrides, indent=2) + "\n", encoding="utf-8")
 
-    # GPL-3.0-only must not be misidentified as GPL-3.0-or-later.
-    # Resolve its Patchstorage licence ID from the uploader's mapping.
+    # Patchstorage's GPLv3 category is ID 4178 (as used by the MIDI Monitor
+    # publisher). This category does not distinguish GPL-3.0-only from
+    # GPL-3.0-or-later. Our actual licence remains GPL-3.0-only in the
+    # project LICENSE, source, and LV2 metadata.
     license_path = uploader_dir / "licenses.json"
     licenses = json.loads(license_path.read_text(encoding="utf-8"))
-    candidates = {
-        "https://www.gnu.org/licenses/gpl-3.0.html",
-        "https://spdx.org/licenses/GPL-3.0-only.html",
-        "https://opensource.org/license/gpl-3-0",
-    }
-    found = [key for key, aliases in licenses.items()
-             if isinstance(aliases, list) and candidates.intersection(aliases)]
-    if len(found) != 1:
+    license_id = "4178"
+    aliases = licenses.get(license_id)
+    if not isinstance(aliases, list):
         raise RuntimeError(
-            "Patchstorage uploader has no unambiguous GPL-3.0-only mapping. "
-            "Inspect licenses.json and correct the alias rather than "
-            "publishing with GPL-3.0-or-later.")
-    # Make sure our actual declared doap:license URI is recognised.
-    aliases = licenses[found[0]]
-    if "https://www.gnu.org/licenses/gpl-3.0.html" not in aliases:
-        aliases.append("https://www.gnu.org/licenses/gpl-3.0.html")
+            "Patchstorage GPLv3 licence category 4178 is missing or changed; "
+            "review upstream licenses.json before publishing."
+        )
+    license_uri = "https://www.gnu.org/licenses/gpl-3.0.html"
+    # Ensure one unique mapping: the uploader looks up a licence by URL.
+    for other_id, other_aliases in licenses.items():
+        if other_id != license_id and isinstance(other_aliases, list) and license_uri in other_aliases:
+            raise RuntimeError(
+                f"GPLv3 licence URI already mapped to Patchstorage ID {other_id}; "
+                "review upstream licenses.json before publishing."
+            )
+    if license_uri not in aliases:
+        aliases.append(license_uri)
     license_path.write_text(json.dumps(licenses, indent=2) + "\n", encoding="utf-8")
+    print("Patchstorage licence category: GPLv3 (ID 4178); "
+          "project SPDX licence remains GPL-3.0-only")
 
     # Import upstream uploader as a library so upload errors fail the workflow
     # (the upstream `push all` CLI catches some errors and continues).
