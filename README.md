@@ -1,6 +1,6 @@
 # piStomp MIDI Latency Probe
 
-Lightweight LV2 plugin for GuitarMidi-LV2 benchmarking on piStomp v3 (Pi 5).
+Lightweight LV2 plugin for audio-to-MIDI and MIDI-instrument response-time measurements on piStomp v3 (Pi 5) and other LV2 hosts.
 
 ## ⚠️ DANGER — NEVER CONNECT THE ENCODED MIDI PCM OUTPUT TO SPEAKERS OR AN AMPLIFIER
 
@@ -44,7 +44,11 @@ For a manual ZIP, `make package` is still available, but the Actions workflow do
 
 Download the appropriate GitHub Actions artifact and unzip it. Install the `pistomp-midi-latency-probe.lv2` directory under your piStomp LV2 bundle directory (e.g. `/home/patch/.lv2` or your existing custom-plugin location). Refresh/restart the plugin host as needed.
 
-## MODEP wiring
+## Two measurement modes
+
+The **same plugin and stereo PCM format** support both workflows. No plugin rebuild or DSP change is necessary. The left channel is always the supplied audio input; the right channel is always **diagnostic MIDI PCM, NEVER listening audio**.
+
+### Mode A — audio-to-MIDI (GuitarMidi)
 
 ```
                +--------------------------> Probe: Dry Guitar In
@@ -57,14 +61,50 @@ Probe: Encoded MIDI Right --> RECORDER ONLY (right, monitoring MUTED)
 
 Record the two outputs as stereo **with no effects, gain adjustments, pan mixing or resampling on the right channel**. Use piStomp's existing recorder or an external stereo capture. **WARNING: Never route the right channel into a loudspeaker, amplifier, monitor bus, or headphones. Disable monitoring on the recorder.** It contains encoded diagnostic PCM, not music. If recording to integer PCM, use 16-bit or better, preferably 32-bit float WAV. Do not use MP3 or other lossy compression.
 
+### Mode B — MIDI-to-audio (MIDI instrument response latency)
+
+Feed a MIDI source to both the **instrument under test** and the **Probe: MIDI In**. Feed the instrument’s **audio output** to **Probe: Dry Guitar In** (the port name is historical: it accepts any mono audio). Capture the Probe’s stereo outputs unchanged:
+
+```text
+MIDI keyboard / MIDI test generator --+--> Instrument: MIDI In
+                                     +--> Probe: MIDI In
+
+Instrument: Audio Out --------------------> Probe: Dry Guitar In
+Probe: Dry Audio Left -------------------> RECORDER left channel
+Probe: Encoded MIDI Right --------------> RECORDER right channel (MONITORING OFF)
+```
+
+**DANGER: The encoded MIDI right output must NEVER go to speakers, headphones, an amplifier or a live monitoring bus.** Do not audition either the recorded encoded-right channel or the reconstructed impulse-right channel. Instrument audio can be monitored separately with a *safe, independent* route, not via diagnostic right-channel playback.
+
+This measures time from the **MIDI Note On arriving at the Probe** to the first detectable audio attack at the Probe audio input. In the simplest setup, route the same MIDI stream to both ports; for a hardware instrument, its analogue audio output must be connected to a suitable audio interface input and level-matched. It includes instrument processing, its patch attack envelope and any audio routing latency. It does *not* measure the MIDI controller's internal scan time or any latency before the MIDI split. For best accuracy, split MIDI close to the instrument and use equally direct signal paths.
+
+For automated estimates, use isolated short notes with adequate silence before each note, preferably a percussive patch with fast attack and no reverb or delay. Consecutive/polyphonic notes or notes over a sustained tail are flagged as ambiguous. The waveform's first detectable attack depends on a threshold, so this measures practical **audio response**, not necessarily the first nonzero PCM sample.
+
 ## Decode on Windows or other computer
 
 ```
 py -m pip install numpy soundfile
 py tools/decode.py measurement.wav
+
+# For MIDI instrument response measurements:
+py tools/decode.py instrument_recording.wav --mode instrument
 ```
 
 Writes `measurement_midi_events.csv` with precise incoming MIDI event timestamps and `measurement_reconstructed.wav` with the dry guitar left, MIDI impulses right (positive = Note On; negative = Note Off). **The reconstructed WAV is also diagnostic data: do not play the right channel through speakers or headphones.** Where multiple events share the same exact sample, CSV contains them all and the reconstructed WAV combines their visual markers.
+
+### Instrument response latency output
+
+`--mode instrument` retains the normal MIDI event CSV and reconstructed diagnostic WAV, and also writes `instrument_recording_instrument_latency.csv`. Each Note On has its own row, with MIDI time, detected audio attack time, latency (samples and milliseconds), and a status. Only rows marked `measured` enter the printed summary; possible statuses include `audio_already_sounding`, `overlapping_notes`, `no_detectable_attack`, and `insufficient_recording`.
+
+Onset detection uses a **causal 1 ms RMS window** (default), scanning up to **250 ms** after each Note On for a sustained rise crossing both a **−45 dBFS** gate and **12 dB** above local pre-note RMS. Adjust for instrument level and timbre, for example:
+
+```shell
+py tools/decode.py instrument_recording.wav --mode instrument --threshold-dbfs -55 --search-ms 500
+```
+
+The measured onset can shift with threshold, patch envelope, effects and recording level. The default algorithm *does not* try to separate mixed/polyphonic notes, and rejects Note Ons that overlap an earlier note's search window or start over audible signal; inspect the left-channel waveform if these statuses occur. If there is no audio attack within the scan window, it reports `no_detectable_attack`, not a fabricated latency.
+
+**Clock/measurement caveat:** MIDI event timestamps and the left-channel audio are aligned within the Probe’s LV2 processing clock. This measures arrival-to-audio response *as seen by the Probe*, including any differential routing delays introduced before its inputs. Do not add effects or resampling in either branch, and disable MIDI/audio monitoring of the encoded channel.
 
 ## Format and timing
 
@@ -88,7 +128,7 @@ Byte `b` is encoded as `(b + 1) / 512.0` (positive and recoverable in 16-bit or 
 * Prototype encodes MIDI channel voice messages only (Note On/Off, CC, program change, pitch bend and aftertouch), **not SysEx/system real-time**.
 * Fixed 1024-record static FIFO; if more than 1023 MIDI events arrive faster than 15 frames each for a sustained period, events may drop. This would need an overflow/status indicator in a later version.
 * If the right channel is silenced or attenuated by the recorder, the byte stream cannot be recovered.
-* This captures MIDI **arrival time at the probe**. It doesn't directly measure the TFLite model's execution time; guitar attack detection against the dry waveform remains a separate analysis step.
+* This captures MIDI **arrival time at the probe**. It does not directly measure a model's execution time; guitar onset detection remains separate. In instrument mode, measured attack latency includes the instrument patch and its audio path and is threshold dependent.
 * The 15-sample serialisation doesn't change the original MIDI timestamps, but the PCM pulse starts can be delayed when MIDI events overlap. Use the decoder's reconstructed WAV or CSV, **not the original right-channel packet locations**, for latency measurements.
 
 License: **GNU GPL version 3 only (GPL-3.0-only)**. See [LICENSE](LICENSE).
